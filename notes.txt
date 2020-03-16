@@ -1,0 +1,26 @@
+* Build on Ubuntu 18.04
+
+sudo apt install python-dev python-pip
+pip install -U --user pip six numpy wheel setuptools mock 'future>=0.17.1'
+pip install -U --user keras_applications --no-deps
+pip install -U --user keras_preprocessing --no-deps
+
+https://docs.bazel.build/versions/master/install-ubuntu.html
+
+git clone https://github.com/tensorflow/tensorflow.git
+cd tensorflow
+./configure
+bazel build --config=v1 --compilation_mode=dbg //tensorflow/tools/pip_package:build_pip_package
+./bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg
+pip install /tmp/tensorflow_pkg/tensorflow-xx-cp37-cp37m-linux_x86_64.whl
+python -c "import tensorflow as tf;print(tf.reduce_sum(tf.random.normal([1000, 1000])))"
+
+* Debugging without whl installation
+
+mkdir _python_build
+cd _python_build
+ln -s ../bazel-bin/tensorflow/tools/pip_package/build_pip_package.runfiles/org_tensorflow/* .
+ln -s ../tensorflow/tools/pip_package/* .
+python setup.py develop
+set env PYTHONPATH .
+
